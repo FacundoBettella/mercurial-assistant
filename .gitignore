@@ -4,10 +4,19 @@
 .env.test.local
 .env.production.local
 .env.local
-.env.example
 
 # Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Virtual environment
+.venv/
+
+# Runtime artifacts
+logs/
+
+# Assignment/notes (personal)
+*activity*.md
+safety*.md
 

@@ -9,7 +9,7 @@ from src.middleware import (
 	JsonLogRepository,
 )
 
-app = FastAPI(title="Moderation Middleware")
+app = FastAPI(title="MercurIAl Assitent")
 
 log_repository = JsonLogRepository(logs_dir=os.getenv("LOGS_DIR", "logs"))
 
@@ -17,7 +17,6 @@ service = ModerationService(
 	salt=os.getenv("LOG_HASH_SALT", "dev-salt"),
 	log_repository=log_repository,
 )
-
 
 @app.post("/moderate", response_model=ModerationResponse)
 async def moderate(
@@ -30,7 +29,6 @@ async def moderate(
 	try:
 		detected_risks, action, reason = service.evaluate(body.text)
 
-		# Log the moderation event via repository
 		service.log_moderation_event(
 			user_id=body.user_id,
 			text=body.text,
@@ -45,5 +43,5 @@ async def moderate(
 			moderation_action=action,
 			reason=reason,
 		)
-	except Exception as exc:  # pragma: no cover
+	except Exception as exc:
 		raise HTTPException(status_code=503, detail="Moderation service unavailable") from exc
