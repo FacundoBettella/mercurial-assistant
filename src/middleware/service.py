@@ -2,6 +2,8 @@
 
 import hashlib
 from datetime import UTC, datetime
+import re
+import unicodedata
 
 from .schemas import LogRepository, ModerationAction
 
@@ -41,6 +43,15 @@ class ModerationService:
         """Hash PII with salt for anonymization."""
         return hashlib.sha256(f"{self._salt}:{value}".encode("utf-8")).hexdigest()
 
+    def _normalize_text(self, text: str) -> str:
+        # Lowercase + normalize unicode variants (e.g. ｂ → b, ﬁ → fi)
+        normalized = unicodedata.normalize("NFKC", text.lower())
+        # Replace punctuation and symbols with spaces (strips obfuscation like b@mb or b.o.m.b)
+        normalized = re.sub(r"[\W_]+", " ", normalized)
+        # Collapse multiple spaces into one and trim edges
+        normalized = re.sub(r"\s+", " ", normalized).strip()
+        return normalized
+
     def evaluate(self, text: str) -> tuple[list[str], ModerationAction, str]:
         """Evaluate text for policy violations.
 
@@ -52,7 +63,7 @@ class ModerationService:
         Returns:
             tuple: (detected_risks, action, reason)
         """
-        normalized = text.lower()
+        normalized = self._normalize_text(text)
         risks: list[str] = []
 
         # Step 1: Scan for explicit risk keywords
