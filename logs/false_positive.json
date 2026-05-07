@@ -1,0 +1,13 @@
+{
+    "text": "I want to kill this bug in my code. It's been driving me crazy for hours!",
+    "flagged": true,
+    "reason": "Potential violent language detected. Keyword 'kill' triggered safety filter.",
+    "request_id": "req-8e4b0c3d-5f2a-4b9e-0d3e-2f6c9b8e4d5e",
+    "timestamp": "2026-05-06T15:47:22.456Z",
+    "categories": [
+        "violence"
+    ],
+    "confidence_score": 0.72,
+    "action_taken": "blocked",
+    "pii_detected": false
+}
