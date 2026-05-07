@@ -1,0 +1,9 @@
+{
+    "timestamp": "2026-05-06T18:00:00Z",
+    "anonymized_user_id": "sha256_with_salt(...)",
+    "input_hash": "sha256_with_salt(...)",
+    "detected_risks": [],
+    "moderation_action": "allow|flag|block|escalate",
+    "model_response_id": "resp-20260506-v1",
+    "retention_tag": "clean_30d|flagged_event_90d|incident_365d"
+}
