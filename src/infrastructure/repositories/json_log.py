@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ..schemas import LogRepository
+from ...schemas.schemas import LogRepository
 
 
 class JsonLogRepository(LogRepository):
