@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 import re
 import unicodedata
 
-from .schemas import LogRepository, ModerationAction
+from ...schemas.schemas import LogRepository, ModerationAction
 
 
 class ModerationService:
