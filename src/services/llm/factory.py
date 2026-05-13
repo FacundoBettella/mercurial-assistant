@@ -7,8 +7,6 @@ class LLMProviderFactory:
 
     @staticmethod
     def create_provider(settings: Settings) -> LLMProvider:
-
-        print(settings)
         """
         Create and return the configured LLM provider.
 

@@ -21,3 +21,5 @@ logs/
 *activity*.md
 safety*.md
 
+# Ide
+.vscode
