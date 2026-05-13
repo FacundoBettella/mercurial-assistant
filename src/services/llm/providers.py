@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 class LLMProvider(ABC):
@@ -15,16 +15,16 @@ class LLMProvider(ABC):
 class OpenAIProvider(LLMProvider):
     """OpenAI LLM provider."""
 
-    def __init__(self, api_key: str, default_model: str = "gpt-4.1-mini") -> None:
-        self.api_key = api_key
+    def __init__(self, api_key: str, default_model: str = "gpt-4o-mini") -> None:
+        self.client = AsyncOpenAI(api_key=api_key)
         self.default_model = default_model
-        self.client = OpenAI(api_key=self.api_key)
 
     async def generate(self, prompt: str, model: str | None = None) -> str:
         """Generate completion from OpenAI."""
         response = await self.client.chat.completions.create(
             model=model or self.default_model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            max_completion_tokens=100
         )
         return response.choices[0].message.content
 

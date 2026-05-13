@@ -1,5 +1,8 @@
 import os
 from enum import Enum
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class LLMProviderType(str, Enum):
     OPENAI = "openai"
