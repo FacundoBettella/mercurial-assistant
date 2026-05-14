@@ -1,0 +1,26 @@
+# ZERO-SHOT PROMPTING
+# No examples provided - model relies only on instructions
+
+SYSTEM PROMPT:
+"""
+You are a support ticket classifier. Categorize tickets into: technical, billing, account, cancellation, feature, other.
+Respond with JSON containing: category, priority (low/medium/high/critical), sentiment (satisfied/neutral/frustrated/angry).
+"""
+
+USER INPUT:
+"No puedo acceder a mi cuenta, me dice error 403"
+
+EXPECTED BEHAVIOR:
+- Model infers from general knowledge what this means
+- No examples to guide it
+- Works well with powerful models (GPT-4), struggles with smaller ones
+
+PROS:
+✓ No token overhead (no examples)
+✓ Fast to set up
+✓ Works for simple tasks
+
+CONS:
+✗ Inconsistent output format
+✗ May miss domain-specific nuances
+✗ Requires larger/more expensive models for good results

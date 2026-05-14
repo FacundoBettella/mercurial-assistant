@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ...schemas.schemas import LogRepository
+from src.domain.interfaces.log_repository import ILogRepository
 
 
-class JsonLogRepository(LogRepository):
+class JsonLogRepository(ILogRepository):
     """Concrete implementation: writes logs to JSONL files.
 
     Can be replaced with PostgresLogRepository, ElasticsearchRepository, etc.

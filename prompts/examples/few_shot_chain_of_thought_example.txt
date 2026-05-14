@@ -1,0 +1,90 @@
+# FEW-SHOT + CHAIN-OF-THOUGHT (COMBINED)
+# Best of both worlds: examples + explicit reasoning steps
+
+SYSTEM PROMPT:
+"""
+You are a support ticket classifier.
+Analyze each ticket step by step (chain-of-thought internally), then respond with JSON.
+Learn from these examples:
+"""
+
+EXAMPLE 1:
+User: "Me cobraron dos veces este mes"
+Reasoning (internal):
+- Issue: Duplicate billing charge
+- Urgency: CRITICAL (money involved, customer angry)
+- Sentiment: Enojado (demanding immediate action)
+- Category: Facturacion
+- Churn risk: HIGH (money issues = high cancellation risk)
+
+Response:
+{
+  "categoria": "facturacion",
+  "subcategoria": "cargo_duplicado",
+  "prioridad": "critica",
+  "sentimiento": "enojado",
+  "riesgo_fuga": 0.85,
+  "respuesta_inicial": "Tenés razón en estar enojado. Ya procesamos el reembolso."
+}
+
+EXAMPLE 2:
+User: "Tienen API para integrar con nuestra plataforma?"
+Reasoning (internal):
+- Issue: Technical inquiry about API availability
+- Urgency: MEDIUM (not blocking, but business-related)
+- Sentiment: Neutral (professional inquiry)
+- Category: Consulta funcionalidad
+- Churn risk: LOW (exploration, not complaint)
+
+Response:
+{
+  "categoria": "consulta_funcionalidad",
+  "subcategoria": "api_integracion",
+  "prioridad": "media",
+  "sentimiento": "neutral",
+  "riesgo_fuga": 0.2,
+  "respuesta_inicial": "Sí, tenemos API disponible. Te conectamos con el equipo técnico."
+}
+
+EXAMPLE 3:
+User: "No puedo entrar, error 403"
+Reasoning (internal):
+- Issue: Authentication/authorization error (403 = forbidden)
+- Urgency: HIGH (customer blocked from service)
+- Sentiment: Frustrado (can't use the product)
+- Category: Cuenta
+- Churn risk: MEDIUM (blocking issue, but likely fixable)
+
+Response:
+{
+  "categoria": "cuenta",
+  "subcategoria": "autenticacion",
+  "prioridad": "alta",
+  "sentimiento": "frustrado",
+  "riesgo_fuga": 0.6,
+  "respuesta_inicial": "Vamos a resetear tu contraseña de inmediato."
+}
+
+USER INPUT (new):
+"Quiero cancelar, muy caro comparado con la competencia"
+
+EXPECTED BEHAVIOR:
+1. Model sees the pattern: reasoning → structured JSON
+2. Applies same logical steps to new input
+3. Produces consistent, well-reasoned output
+
+PROS:
+✓✓ Most accurate and consistent
+✓✓ Works with smaller models (gpt-4o-mini)
+✓✓ Domain-specific reasoning + format
+✓ Easy to debug (check if examples are good)
+
+CONS:
+✗ Highest token cost (examples + reasoning)
+✗ Most complex to set up initially
+
+THIS IS WHAT WE'RE USING IN THE PROJECT!
+- System prompt tells model to "analyze step by step internally"
+- Few-shot examples show the desired output structure
+- Model does chain-of-thought internally (not exposed in output)
+- Result: consistent JSON with smart reasoning at low cost
