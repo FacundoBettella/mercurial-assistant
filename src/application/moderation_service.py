@@ -5,7 +5,8 @@ from datetime import UTC, datetime
 import re
 import unicodedata
 
-from ...schemas.schemas import LogRepository, ModerationAction
+from src.domain.interfaces.log_repository import ILogRepository
+from src.domain.entities.moderation_action import ModerationAction
 
 
 class ModerationService:
@@ -14,7 +15,7 @@ class ModerationService:
     Depends on abstraction (LogRepository), not concrete implementation.
     """
 
-    def __init__(self, salt: str, log_repository: LogRepository) -> None:
+    def __init__(self, salt: str, log_repository: ILogRepository) -> None:
         self._salt = salt
         self._log_repository = log_repository
 

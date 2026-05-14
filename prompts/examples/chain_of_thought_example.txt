@@ -1,0 +1,42 @@
+# CHAIN-OF-THOUGHT PROMPTING
+# Ask model to "think step by step" before answering
+
+SYSTEM PROMPT:
+"""
+You are a support ticket classifier.
+Analyze tickets step by step:
+1. Identify the core issue
+2. Assess urgency/priority
+3. Detect customer sentiment
+4. Categorize appropriately
+Then respond with JSON.
+"""
+
+USER INPUT:
+"No puedo acceder a mi cuenta, me dice error 403"
+
+EXPECTED INTERNAL REASONING (chain-of-thought):
+Step 1: Core issue → Authentication/authorization problem (error 403 = forbidden)
+Step 2: Urgency → High (customer is blocked from using service)
+Step 3: Sentiment → Frustrated (can't access their account)
+Step 4: Category → "cuenta" (account-related issue)
+
+FINAL OUTPUT:
+{
+  "categoria": "cuenta",
+  "prioridad": "alta",
+  "sentimiento": "frustrado"
+}
+
+PROS:
+✓ More accurate reasoning
+✓ Better for complex categorization
+✓ Improves model's logical steps
+
+CONS:
+✗ Slower (model generates more tokens)
+✗ More expensive (reasoning tokens cost money)
+✗ Reasoning may not always be visible (internal only)
+
+NOTE: You can make reasoning explicit by asking model to show it:
+"Think step by step and show your reasoning, then provide JSON."
