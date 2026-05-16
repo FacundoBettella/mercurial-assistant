@@ -1,11 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
-
 from src.application.pipeline.pipeline import Pipeline
 from src.application.pipeline.context import ProcessingState
 from src.domain.entities.moderation_request import ModerationRequest
 from src.domain.exceptions import ContentBlockedError
-
 
 @lru_cache
 def _load_system_prompt() -> str:
@@ -14,18 +12,17 @@ def _load_system_prompt() -> str:
     prompt_path = project_root / "prompts" / "system_prompt.txt"
     return prompt_path.read_text(encoding="utf-8").strip()
 
-
 class GenerateCompletionUseCase:
     """Orchestrates the full generation flow: moderation → LLM → logging."""
 
     def __init__(self, pipeline: Pipeline) -> None:
         self._pipeline = pipeline
 
-    async def execute(self, prompt: str, model: str | None = None) -> str:
+    async def execute(self, prompt: str) -> str:
         state = ProcessingState(
             request=ModerationRequest(user_id="anonymous", text=prompt),
             system_prompt=_load_system_prompt(),
-            model=model,
+            model=None
         )
         final_state = await self._pipeline.execute(state)
 
