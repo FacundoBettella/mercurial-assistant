@@ -1,7 +1,6 @@
 from openai import AsyncOpenAI
 from src.domain.interfaces.llm_provider import ILLMProvider
 
-
 class OpenAIProvider(ILLMProvider):
     def __init__(self, api_key: str, default_model: str = "gpt-4o-mini") -> None:
         self.client = AsyncOpenAI(api_key=api_key)
@@ -10,16 +9,18 @@ class OpenAIProvider(ILLMProvider):
     async def generate(
         self,
         prompt: str,
-        model: str | None = None,
+        model: str,
         system_prompt: str | None = None,
     ) -> str:
         messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
         response = await self.client.chat.completions.create(
             model=model or self.default_model,
-            instructions=system_prompt,
             messages=messages,
-            max_output_tokens=150,
+            max_tokens=50,
+            top_p=0.1
         )
         return response.choices[0].message.content

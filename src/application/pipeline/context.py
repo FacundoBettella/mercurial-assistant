@@ -20,7 +20,6 @@ class ProcessingState:
     error: str | None = None
 
     def stop_pipeline(self, reason: str = "blocked") -> None:
-        """Stop pipeline execution."""
         self.should_continue = False
         self.blocked = True
         self.error = reason

@@ -5,8 +5,8 @@ class ILLMProvider(ABC):
     async def generate(
         self,
         prompt: str,
-        model: str | None = None,
         system_prompt: str | None = None,
+        model: str | None = None,
     ) -> str:
         """
         Args:

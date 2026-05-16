@@ -257,28 +257,10 @@ El sistema está optimizado para **español rioplatense** (Argentina/Uruguay):
 
 → Asegurate que la carpeta `prompts/` existe con `system_prompt.txt` y `few_shot_examples.json`
 
-### Error: "PermissionError: metrics/metrics.json"
-
-→ Creá la carpeta `metrics/` manualmente: `mkdir metrics`
-
-### Tests fallan con "ModuleNotFoundError"
-
-→ Instalá pytest-asyncio: `pip install pytest-asyncio`
-
-## 📝 Próximos Pasos
-
-- [ ] Persistencia en PostgreSQL/SQLite
-- [ ] Dashboard web con métricas en tiempo real
-- [ ] Integración con sistemas de tickets (Zendesk, Freshdesk, JIRA)
-- [ ] Fine-tuning del modelo con datos históricos
-- [ ] A/B testing de diferentes temperaturas y prompts
-- [ ] Rate limiting y retry con exponential backoff
-
 ## 📄 Licencia
 
 MIT
 
 ---
 
-**Proyecto creado para M1 - AI Engineering**
 *Ticket Triage Autopilot: Automatización inteligente de soporte al cliente en español* 🚀
