@@ -88,3 +88,13 @@ El prompt principal usado por el modelo está en `prompts/main_prompt.txt`. All�
 - El sistema no resuelve tickets, solo los clasifica y encola según urgencia.
 - El costo es estimado según precios públicos de OpenAI.
 - El modelo puede fallar ante entradas muy adversariales, pero existe fallback seguro.
+
+## 🔒 Seguridad
+
+El sistema aplica 3 capas de validación ANTES de enviar a OpenAI:
+
+- **Datos sensibles:** Detecta tarjetas de crédito (Visa, MC, Amex), SSN, CUIT/CUIL argentinos
+- **Prompt injection:** Detecta intentos de manipular el prompt (en español e inglés)
+- **Lenguaje abusivo:** Keywords ofensivos en español e inglés
+
+Si el ticket es bloqueado, devuelve una respuesta de fallback segura y NO consume tokens.
