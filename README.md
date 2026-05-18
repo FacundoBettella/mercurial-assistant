@@ -1,266 +1,90 @@
-# 🎫 Ticket Triage Autopilot
+# 🤖 Ticket Triage Autopilot
 
-Sistema inteligente de triage automático para tickets de soporte al cliente en español (Argentina/Uruguay). Utiliza OpenAI GPT-4o-mini para categorizar, priorizar y sugerir respuestas iniciales en tickets de soporte, optimizado para equipos hispanohablantes.
+Sistema inteligente de triage automático para tickets de soporte al cliente en español rioplatense (Argentina/Uruguay). Utiliza OpenAI GPT-4o-mini para analizar, priorizar y sugerir respuestas iniciales, devolviendo siempre un JSON estructurado y registrando métricas de cada consulta.
 
-## 🎯 ¿Qué Hace?
+## ¿Qué hace?
 
 Convierte esto:
 
 ```
-"Me cobraron dos veces el mes pasado. Quiero el reembolso YA."
+"Me cobraron dos veces este mes, necesito una solución urgente."
 ```
 
-En esto:
+en esto:
 
 ```json
 {
-  "categoria": "facturacion",
-  "subcategoria": "cargo_duplicado",
-  "prioridad": "critica",
-  "respuesta_inicial": "Tenés toda la razón en estar enojado. Este fue un error nuestro...",
-  "confianza": 0.95,
-  "tiempo_resolucion_estimado_minutos": 5,
-  "equipo_asignado": "equipo_facturacion",
-  "sla_minutos": 30,
-  "sentimiento_cliente": "enojado",
-  "riesgo_fuga": 0.85,
-  "acciones": ["procesar_reembolso", "enviar_confirmacion", "monitorear_cuenta"]
+  "answer": "Lamentamos mucho el inconveniente con la facturación. Tu caso fue clasificado como crítico y será gestionado con máxima prioridad.",
+  "confidence": 0.98,
+  "actions": ["Encolar ticket como crítico", "Notificar a equipo de facturación"],
+  "priority": "critical",
+  "churn_risk": 0.9
 }
 ```
 
-## ✨ Características
+## Características
 
-- ✅ **Categorización automática**: issue_tecnico, facturacion, cuenta, cancelacion, consulta_funcionalidad, otro
-- ✅ **Priorización inteligente**: baja → media → alta → crítica
-- ✅ **Respuestas empáticas** en español rioplatense (vos, podés, etc.)
-- ✅ **Detección de riesgo de fuga**: 0.0 - 1.0 (cliente satisfecho → cliente furioso)
-- ✅ **Routing automático**: asigna al equipo correcto (soporte_tier1, equipo_tecnico, escalacion_ejecutiva)
-- ✅ **Seguridad por patrones**: detecta tarjetas de crédito, SSN, CUIT/CUIL, prompt injection, lenguaje abusivo
-- ✅ **Métricas detalladas**: tokens, latencia, costo por ticket
-- ✅ **Few-shot learning**: 5 ejemplos anotados guían el comportamiento del modelo
+- Clasificación automática de prioridad y riesgo de fuga
+- Respuestas empáticas en español rioplatense (vos, podés, tenés)
+- Registro de métricas: tokens, latencia, costo estimado por consulta
+- Prompt engineering: few-shot y chain-of-thought
+- Moderación de contenido adversarial (fallback seguro):
+  - **ModerationService** detecta lenguaje riesgoso, intentos de prompt injection, amenazas o datos sensibles, y bloquea o anonimiza según reglas de negocio.
+  - **LogRepository** registra todos los eventos de moderación en un archivo JSONL para trazabilidad y auditoría.
+- Arquitectura Clean Architecture
 
-## 🏗️ Arquitectura (Clean Architecture + DDD)
+## Estructura
 
 ```
 src/
-├── domain/                      # Lógica de negocio pura (sin dependencias)
-│   ├── entities/                # Value objects (Ticket, TriageResult, TriageMetrics)
-│   └── interfaces/              # Abstracciones (ILLMService, ISafetyChecker, IMetricsRepository)
-├── application/                 # Casos de uso (orquestación)
-│   ├── triage_ticket_use_case.py        # Flujo: safety → LLM → metrics
-│   └── get_metrics_summary_use_case.py  # Consulta de estadísticas
-├── infrastructure/              # Implementaciones concretas
-│   ├── llm/                     # Adaptador OpenAI
-│   ├── safety/                  # Checker basado en regex
-│   ├── repositories/            # Persistencia JSON
-│   └── prompts/                 # Carga de prompts/ejemplos
-├── core/                        # Configuración + Dependency Injection
-│   ├── config.py                # Settings (pydantic-settings)
-│   └── dependencies.py          # Factory functions (@lru_cache)
-└── api/                         # Puntos de entrada
-    └── cli.py                   # CLI con argparse
+├── domain/           # Lógica de negocio pura (interfaces, servicios)
+├── application/      # Casos de uso y orquestación
+├── infrastructure/   # Adaptadores (OpenAI, persistencia, métricas)
+├── core/             # Configuración y DI
+├── api/              # Endpoints FastAPI
+├── prompts/          # main_prompt.txt (instrucciones y ejemplos)
+├── logs/             # moderation_events.jsonl (eventos de moderación, trazabilidad)
+├── metrics/          # metrics.csv (registro de métricas de cada request)
 ```
 
-### Principios Aplicados
+## Variables de entorno
 
-| Principio | Implementación |
-|-----------|----------------|
-| **SRP** | Cada clase tiene 1 responsabilidad (OpenAILLMService solo habla con OpenAI) |
-| **DIP** | Use cases dependen de interfaces (ABC), no de implementaciones |
-| **OCP** | Extendible sin modificar código existente (nuevo LLM provider → implementar ILLMService) |
-| **Repository Pattern** | Abstracción de persistencia (JSON hoy, PostgreSQL mañana sin cambiar use cases) |
-| **Dependency Injection** | Todas las dependencias inyectadas vía factory functions |
+- `OPENAI_API_KEY` — API key de OpenAI
+- `OPENAI_MODEL` — Modelo a usar (por defecto: gpt-4o-mini)
+- `LOGS_DIR` — Carpeta para logs generales (por defecto: logs)
+- `METRICS_DIR` — Carpeta para métricas (por defecto: metrics)
 
-## 🚀 Setup
-
-### 1. Requisitos
-
-- Python 3.10+
-- OpenAI API Key
-
-### 2. Instalar dependencias
+## Comandos principales
 
 ```bash
+# Instalar dependencias
 pip install -r requirements.txt
+
+# Ejecutar servidor FastAPI
+uvicorn src.main:app --reload
 ```
 
-### 3. Configurar variables de entorno
+## Cómo ver métricas
 
-Crear archivo `.env` en la raíz:
+Cada request registra métricas en `metrics/metrics.csv`:
 
-```env
-OPENAI_API_KEY=sk-proj-...
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_TEMPERATURE=0.3
-OPENAI_MAX_TOKENS=500
-PROMPTS_DIR=prompts
-METRICS_FILE=metrics/metrics.json
-LOG_LEVEL=INFO
-```
+- timestamp, prompt, modelo, tokens_prompt, tokens_completion, total_tokens, latency_ms, estimated_cost_usd
 
-### 4. Ejecutar tests
+## Cómo ver logs de moderación
 
-```bash
-pytest tests/ -v
-```
+Todos los eventos de moderación (bloqueos, riesgos detectados, etc.) se registran en `logs/moderation_events.jsonl`. Cada línea es un JSON con el detalle del evento para trazabilidad y auditoría.
 
-## 📖 Uso
+## Prompt principal
 
-### Modo CLI (salida con emojis y formato legible)
+El prompt principal usado por el modelo está en `prompts/main_prompt.txt`. Allí se definen las instrucciones, el formato de salida y los ejemplos few-shot.
 
-```bash
-python -m src.api.cli "No puedo acceder a mi cuenta, me dice error 403"
-```
+## Cómo probar la app
 
-Salida:
+1. Levantá el servidor con `uvicorn src.main:app --reload`.
+2. Accedé a la documentación interactiva en [http://localhost:8080/docs](http://localhost:8080/docs) para probar los endpoints y enviar consultas manualmente.
 
-```
-📂 Categoría: cuenta (autenticacion)
-🚨 Prioridad: alta
-👥 Equipo: soporte_tier1
-⏱️ SLA: 30 minutos
+## Limitaciones
 
-😊 Respuesta inicial:
-Entendemos lo frustrante que es esto. Vamos a resetear tu contraseña...
-
-⚠️ Riesgo de fuga: 0.6
-✅ Confianza: 0.92
-
-📋 Acciones:
-  • enviar_link_reset_password
-  • monitorear_seguimiento
-
-📊 Métricas:
-  • Tokens: 100 (entrada) + 50 (salida) = 150 total
-  • Latencia: 250 ms
-  • Costo: $0.0001
-```
-
-### Modo JSON (para integración con sistemas)
-
-```bash
-python -m src.api.cli "Me cobraron dos veces" --json
-```
-
-Salida:
-
-```json
-{
-  "ticket_id": "auto-generated-uuid",
-  "categoria": "facturacion",
-  "subcategoria": "cargo_duplicado",
-  "prioridad": "critica",
-  ...
-}
-```
-
-### Ver resumen de métricas
-
-```bash
-python -m src.api.cli --resumen
-```
-
-Salida:
-
-```
-📊 RESUMEN DE MÉTRICAS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📂 Total de tickets procesados: 42
-⏱️  Latencia promedio: 245 ms
-💰 Costo total: $0.0052
-🔒 Tickets bloqueados (seguridad): 3
-```
-
-## 🔒 Seguridad
-
-El sistema aplica 3 capas de validación ANTES de enviar a OpenAI:
-
-1. **Datos sensibles**: Tarjetas de crédito (Visa, MC, Amex), SSN, CUIT/CUIL argentinos
-2. **Prompt injection**: Detecta intentos de manipular el prompt (en español e inglés)
-3. **Lenguaje abusivo**: Keywords ofensivos en español e inglés
-
-Si el ticket es bloqueado, devuelve una respuesta de fallback segura y NO consume tokens.
-
-## 💰 Costos
-
-Modelo: **gpt-4o-mini**
-
-- Input: $0.15 / 1M tokens
-- Output: $0.60 / 1M tokens
-
-**Ejemplo real:**
-
-- Ticket: "No puedo acceder a mi cuenta" (10 palabras)
-- Tokens entrada: ~100 (system prompt + few-shot + mensaje)
-- Tokens salida: ~50 (JSON estructurado)
-- Costo por ticket: **$0.0001** (0.01 centavos de dólar)
-
-**Proyección:**
-
-- 1,000 tickets/día = **$0.10/día** = **$3/mes**
-- 10,000 tickets/día = **$1/día** = **$30/mes**
-
-## 📊 Métricas Recopiladas
-
-Cada triage guarda en `metrics/metrics.json`:
-
-```json
-{
-  "ticket_id": "T123",
-  "timestamp": "2025-01-15T10:30:00",
-  "tokens_prompt": 100,
-  "tokens_completion": 50,
-  "tokens_total": 150,
-  "latencia_ms": 245,
-  "costo_usd": 0.0001
-}
-```
-
-## 🧪 Tests
-
-```bash
-# Correr todos los tests
-pytest tests/ -v
-
-# Solo tests de dominio
-pytest tests/unit/domain/ -v
-
-# Solo tests de infrastructure
-pytest tests/unit/infrastructure/ -v
-
-# Con cobertura
-pytest tests/ --cov=src --cov-report=html
-```
-
-Tests incluidos:
-
-- ✅ Domain: validaciones de entidades (Ticket, TriageResult)
-- ✅ Infrastructure: PatternSafetyChecker (detección de CC, SSN, injection, abuse)
-- ✅ Application: TriageTicketUseCase (flujo completo con mocks)
-
-## 🌍 Contexto Regional
-
-El sistema está optimizado para **español rioplatense** (Argentina/Uruguay):
-
-- Usa "vos" en lugar de "tú"
-- Verbos conjugados correctamente: "podés", "tenés", "querés"
-- Tono directo pero cordial, evita formalidad excesiva
-- Detecta CUIT/CUIL (identificadores argentinos)
-
-## 🔧 Troubleshooting
-
-### Error: "OpenAI API key not found"
-
-→ Verificá que `.env` esté en la raíz y contenga `OPENAI_API_KEY=sk-...`
-
-### Error: "FileNotFoundError: prompts/system_prompt.txt"
-
-→ Asegurate que la carpeta `prompts/` existe con `system_prompt.txt` y `few_shot_examples.json`
-
-## 📄 Licencia
-
-MIT
-
----
-
-*Ticket Triage Autopilot: Automatización inteligente de soporte al cliente en español* 🚀
+- El sistema no resuelve tickets, solo los clasifica y encola según urgencia.
+- El costo es estimado según precios públicos de OpenAI.
+- El modelo puede fallar ante entradas muy adversariales, pero existe fallback seguro.

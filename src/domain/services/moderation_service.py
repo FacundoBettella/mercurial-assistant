@@ -1,5 +1,3 @@
-"""Domain services for content moderation."""
-
 import hashlib
 import re
 import unicodedata
@@ -7,7 +5,6 @@ from datetime import UTC, datetime
 
 from src.domain.entities.moderation_action import ModerationAction
 from src.domain.interfaces.log_repository import ILogRepository
-
 
 class ModerationEvaluator:
     """Stateless domain service: classifies text and hashes PII.

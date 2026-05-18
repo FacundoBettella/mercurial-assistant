@@ -14,12 +14,10 @@ __pycache__/
 .venv/
 
 # Runtime artifacts
-logs/
-
-# Assignment/notes (personal)
-*M1*.md
-*activity*.md
-safety*.md
+logs/*
+!logs/.gitkeep
+metrics/*
+!metrics/.gitkeep
 
 # Ide
 .vscode

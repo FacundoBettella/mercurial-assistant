@@ -11,7 +11,7 @@ class OpenAIProvider(ILLMProvider):
         prompt: str,
         model: str,
         system_prompt: str | None = None,
-    ) -> str:
+    ) -> dict:
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -20,7 +20,15 @@ class OpenAIProvider(ILLMProvider):
         response = await self.client.chat.completions.create(
             model=model or self.default_model,
             messages=messages,
-            max_tokens=50,
+            max_tokens=200,
             top_p=0.1
         )
-        return response.choices[0].message.content
+        usage = response.usage if hasattr(response, "usage") else None
+        return {
+            "content": response.choices[0].message.content,
+            "usage": {
+                "prompt_tokens": usage.prompt_tokens if usage else 0,
+                "completion_tokens": usage.completion_tokens if usage else 0,
+                "total_tokens": usage.total_tokens if usage else 0
+            }
+        }

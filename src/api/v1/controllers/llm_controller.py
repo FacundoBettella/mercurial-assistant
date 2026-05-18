@@ -10,7 +10,4 @@ async def generate_completion(
     body: LLMGenerateRequestDTO,
     use_case: GenerateCompletionUseCase = Depends(get_generate_completion_use_case)
     ) -> LLMGenerateResponseDTO:
-    result = await use_case.execute(prompt=body.prompt)
-    return LLMGenerateResponseDTO(content=result)
-
-
+    return await use_case.execute(prompt=body.prompt)

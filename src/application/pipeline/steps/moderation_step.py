@@ -1,6 +1,6 @@
 from src.domain.interfaces.pipeline_step import IPipelineStep
 from src.application.pipeline.context import ProcessingState
-from src.domain.services.moderation import ModerationService
+from src.domain.services.moderation_service import ModerationService
 from src.domain.entities.moderation_action import ModerationAction
 
 class ModerationStep(IPipelineStep):
