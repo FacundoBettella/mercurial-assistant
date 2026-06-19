@@ -41,6 +41,7 @@ class GenerateCompletionUseCase:
                 actions=parsed["actions"],
                 priority=parsed["priority"],
                 churn_risk=parsed["churn_risk"],
+                topic=parsed.get("topic", "unknown"),
             )
         except Exception as e:
             raise LLMResponseParseError(raw=raw, cause=e) from e

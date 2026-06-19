@@ -32,7 +32,7 @@ class MetricSummaryService:
                 "avg_tokens_per_request": 0.0,
                 "models_used": [],
                 "by_model": {},
-                "top_prompts": [],
+                "top_topics": [],
             }
 
         latencies = [float(r.get("latency_ms", 0)) for r in rows]
@@ -61,9 +61,9 @@ class MetricSummaryService:
             for m, v in by_model.items()
         }
 
-        # Top repeated prompt hashes
-        hash_counts = Counter(r["prompt_hash"] for r in rows if r.get("prompt_hash"))
-        top = [{"prompt_hash": h, "count": c} for h, c in hash_counts.most_common(top_prompts)]
+        # Top topics by frequency
+        topic_counts = Counter(r["topic"] for r in rows if r.get("topic"))
+        top = [{"topic": t, "count": c} for t, c in topic_counts.most_common(top_prompts)]
 
         return {
             "total_requests": len(rows),
@@ -75,5 +75,5 @@ class MetricSummaryService:
             "avg_tokens_per_request": round(total_tokens / len(rows), 1),
             "models_used": models,
             "by_model": by_model_summary,
-            "top_prompts": top,
+            "top_topics": top,
         }

@@ -1,3 +1,5 @@
+import json
+import time
 from src.domain.interfaces.pipeline_step import IPipelineStep
 from src.application.pipeline.context import ProcessingState
 from src.domain.interfaces.llm_provider import ILLMProvider
@@ -15,7 +17,6 @@ class LLMProcessingStep(IPipelineStep):
             state.llm_result = LLMResponse.empty()
             return state
 
-        import time
         start = time.perf_counter()
         result = await self._llm.generate(
             prompt=state.request.text,
@@ -42,6 +43,11 @@ class LLMProcessingStep(IPipelineStep):
             tokens_used=total_tokens
         )
 
+        try:
+            topic = json.loads(result["content"]).get("topic", "unknown")
+        except Exception:
+            topic = "unknown"
+
         self._metrics.record(
             prompt=state.request.text,
             model=state.model,
@@ -49,7 +55,8 @@ class LLMProcessingStep(IPipelineStep):
             tokens_completion=tokens_completion,
             total_tokens=total_tokens,
             latency_ms=latency_ms,
-            estimated_cost_usd=estimated_cost_usd
+            estimated_cost_usd=estimated_cost_usd,
+            topic=topic,
         )
 
         return state

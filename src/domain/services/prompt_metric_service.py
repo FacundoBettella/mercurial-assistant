@@ -1,4 +1,5 @@
 import hashlib
+import re
 from datetime import datetime, timezone
 from src.domain.interfaces.metric_repository import IMetricRepository
 
@@ -8,6 +9,11 @@ class PromptMetricService:
 
     def __init__(self, metric_repository: IMetricRepository) -> None:
         self._repo = metric_repository
+
+    @staticmethod
+    def _hash_prompt(prompt: str) -> str:
+        normalized = re.sub(r"\s+", " ", prompt.lower().strip())
+        return hashlib.sha256(normalized.encode()).hexdigest()[:16]
 
     def record(
         self,
@@ -19,12 +25,13 @@ class PromptMetricService:
         total_tokens: int,
         latency_ms: float,
         estimated_cost_usd: float,
+        topic: str = "unknown",
         timestamp: str | None = None,
     ) -> None:
-        prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
         metric = {
             "timestamp": timestamp or datetime.now(timezone.utc).isoformat(),
-            "prompt_hash": prompt_hash,
+            "prompt_hash": self._hash_prompt(prompt),
+            "topic": topic,
             "model": model,
             "tokens_prompt": tokens_prompt,
             "tokens_completion": tokens_completion,

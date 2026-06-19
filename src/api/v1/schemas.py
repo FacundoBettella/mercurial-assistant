@@ -12,8 +12,8 @@ class ModelBreakdownDTO(BaseModel):
     avg_latency_ms: float
 
 
-class TopPromptDTO(BaseModel):
-    prompt_hash: str
+class TopTopicDTO(BaseModel):
+    topic: str
     count: int
 
 
@@ -27,7 +27,7 @@ class MetricSummaryResponseDTO(BaseModel):
     avg_tokens_per_request: float
     models_used: list[str]
     by_model: dict[str, ModelBreakdownDTO]
-    top_prompts: list[TopPromptDTO]
+    top_topics: list[TopTopicDTO]
 
 class LLMGenerateResponseDTO(BaseModel):
     answer: str = Field(..., description="Model-generated answer, ready to display to the end user.")
@@ -35,3 +35,4 @@ class LLMGenerateResponseDTO(BaseModel):
     actions: list[str] = Field(..., description="Recommended actions for the agent or downstream system.")
     priority: str = Field(..., description="Ticket priority: low, medium, high, or critical.")
     churn_risk: float = Field(..., ge=0, le=1, description="Estimated risk of customer churn (0 to 1).")
+    topic: str = Field(..., description="Ticket topic: billing, technical, account, service, complaint, or inquiry.")
