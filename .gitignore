@@ -19,5 +19,10 @@ logs/*
 metrics/*
 !metrics/.gitkeep
 
-# Ide
+# IDE
 .vscode
+
+# Claude Code
+CLAUDE.md
+FEEDBACK.md
+.claude/

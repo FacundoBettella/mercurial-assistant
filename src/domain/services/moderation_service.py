@@ -8,9 +8,6 @@ from src.domain.interfaces.log_repository import ILogRepository
 
 class ModerationEvaluator:
     """Stateless domain service: classifies text and hashes PII.
-
-    No dependencies on repositories or external services.
-    Fully testable without mocks.
     """
 
     def __init__(self, salt: str) -> None:

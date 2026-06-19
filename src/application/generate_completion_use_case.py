@@ -6,7 +6,7 @@ from src.application.pipeline.pipeline import Pipeline
 from src.application.pipeline.context import ProcessingState
 from src.domain.entities.moderation_request import ModerationRequest
 from src.api.v1.schemas import LLMGenerateResponseDTO
-from src.domain.exceptions import ContentBlockedError
+from src.domain.exceptions import ContentBlockedError, LLMResponseParseError
 from src.core.config import settings
 
 @lru_cache
@@ -32,8 +32,9 @@ class GenerateCompletionUseCase:
             raise ContentBlockedError(final_state.error or "Content blocked by moderation")
 
         assert final_state.llm_result is not None
+        raw = final_state.llm_result.content
         try:
-            parsed = json.loads(final_state.llm_result.content)
+            parsed = json.loads(raw)
             return LLMGenerateResponseDTO(
                 answer=parsed["answer"],
                 confidence=parsed["confidence"],
@@ -42,10 +43,4 @@ class GenerateCompletionUseCase:
                 churn_risk=parsed["churn_risk"],
             )
         except Exception as e:
-             return LLMGenerateResponseDTO(
-                answer="",
-                confidence=0.0,
-                actions=[],
-                priority="low",
-                churn_risk=0.0,
-             )
+            raise LLMResponseParseError(raw=raw, cause=e) from e

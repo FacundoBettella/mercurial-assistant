@@ -1,10 +1,9 @@
-"""JSON file-based log repository implementation."""
-
 import json
 from pathlib import Path
 from typing import Any
 
 from src.domain.interfaces.log_repository import ILogRepository
+from src.domain.exceptions import PersistenceError
 
 
 class JsonLogRepository(ILogRepository):
@@ -19,7 +18,9 @@ class JsonLogRepository(ILogRepository):
         self.logs_dir.mkdir(exist_ok=True)
 
     def write_log(self, record: dict[str, Any]) -> None:
-        """Append log record to JSONL file."""
         log_path = self.logs_dir / "moderation_events.jsonl"
-        with open(log_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        try:
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        except OSError as e:
+            raise PersistenceError(str(e), path=str(log_path)) from e
