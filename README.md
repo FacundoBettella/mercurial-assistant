@@ -18,13 +18,14 @@ en esto:
   "confidence": 0.98,
   "actions": ["Encolar ticket como crítico", "Notificar a equipo de facturación"],
   "priority": "critical",
-  "churn_risk": 0.9
+  "churn_risk": 0.9,
+  "topic": "billing"
 }
 ```
 
 ## Características
 
-- Clasificación automática de prioridad y riesgo de fuga
+- Clasificación automática de prioridad, riesgo de fuga y temática del ticket
 - Respuestas empáticas en español rioplatense (vos, podés, tenés)
 - Registro de métricas: tokens, latencia, costo estimado por consulta (prompt almacenado como hash SHA-256)
 - Dashboard de métricas vía API: endpoint `/api/v1/metrics/summary` con totales y promedios agregados
@@ -69,16 +70,16 @@ uvicorn src.main:app --reload
 
 Cada request registra métricas en `metrics/metrics.csv`:
 
-- `timestamp`, `prompt_hash`, `model`, `tokens_prompt`, `tokens_completion`, `total_tokens`, `latency_ms`, `estimated_cost_usd`
+- `timestamp`, `prompt_hash`, `topic`, `model`, `tokens_prompt`, `tokens_completion`, `total_tokens`, `latency_ms`, `estimated_cost_usd`
 
-El campo `prompt_hash` es un SHA-256 truncado del texto original, lo que permite agrupar prompts similares sin almacenar el texto crudo.
+`prompt_hash` es un SHA-256 (normalizado, primeros 16 chars) del texto original — nunca se guarda el texto crudo. `topic` es la temática clasificada por el modelo.
 
 ### Dashboard de métricas
 
-`GET /api/v1/metrics/summary` devuelve totales, percentiles de latencia, breakdown por modelo y prompts repetidos:
+`GET /api/v1/metrics/summary` devuelve totales, percentiles de latencia, breakdown por modelo y temáticas más frecuentes:
 
 ```
-GET /api/v1/metrics/summary?model=gpt-4o-mini&top_prompts=5
+GET /api/v1/metrics/summary?model=gpt-4o-mini&top_topics=5
 ```
 
 ```json
@@ -94,13 +95,14 @@ GET /api/v1/metrics/summary?model=gpt-4o-mini&top_prompts=5
   "by_model": {
     "gpt-4o-mini": { "requests": 42, "total_tokens": 38400, "total_cost_usd": 0.00576, "avg_latency_ms": 1823.4 }
   },
-  "top_prompts": [
-    { "prompt_hash": "a3f1c2d4", "count": 8 }
+  "top_topics": [
+    { "topic": "billing", "count": 18 },
+    { "topic": "technical", "count": 12 }
   ]
 }
 ```
 
-Query params opcionales: `model` (filtra por modelo), `top_prompts` (1-20, default 5).
+Query params opcionales: `model` (filtra por modelo), `top_topics` (1-20, default 5).
 
 ## Cómo ver logs de moderación
 
@@ -108,7 +110,7 @@ Todos los eventos de moderación (bloqueos, riesgos detectados, etc.) se registr
 
 ## Prompt principal
 
-El prompt principal usado por el modelo está en `prompts/main_prompt.txt`. Allí se definen las instrucciones, el formato de salida y los ejemplos few-shot.
+El prompt principal está en `prompts/main_prompt.txt`. Define las instrucciones, el formato JSON de salida, los ejemplos few-shot y las temáticas válidas para clasificación. Modificarlo puede romper el parsing de la respuesta en el use case.
 
 ## Cómo probar la app
 
