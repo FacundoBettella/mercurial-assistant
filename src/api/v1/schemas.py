@@ -1,7 +1,17 @@
 from pydantic import BaseModel, Field
 
+
 class LLMGenerateRequestDTO(BaseModel):
     prompt: str = Field(min_length=1, description="User's question or instruction.")
+
+
+class MetricSummaryResponseDTO(BaseModel):
+    total_requests: int
+    total_tokens: int
+    total_cost_usd: float
+    avg_latency_ms: float
+    avg_tokens_per_request: float
+    models_used: list[str]
 
 class LLMGenerateResponseDTO(BaseModel):
     answer: str = Field(..., description="Model-generated answer, ready to display to the end user.")

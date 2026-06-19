@@ -1,6 +1,7 @@
-## Registro de métricas	metrics/metrics.csv o .json	timestamp, tokens_prompt, tokens_completion, total_tokens, latency_ms, estimated_cost_usd
-from src.domain.interfaces.metric_repository import IMetricRepository
+import hashlib
 from datetime import datetime, timezone
+from src.domain.interfaces.metric_repository import IMetricRepository
+
 
 class PromptMetricService:
     """Business logic for formatting and recording prompt metrics."""
@@ -20,9 +21,10 @@ class PromptMetricService:
         estimated_cost_usd: float,
         timestamp: str | None = None,
     ) -> None:
+        prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
         metric = {
             "timestamp": timestamp or datetime.now(timezone.utc).isoformat(),
-            "prompt": prompt,
+            "prompt_hash": prompt_hash,
             "model": model,
             "tokens_prompt": tokens_prompt,
             "tokens_completion": tokens_completion,

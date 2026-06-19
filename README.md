@@ -26,7 +26,8 @@ en esto:
 
 - Clasificación automática de prioridad y riesgo de fuga
 - Respuestas empáticas en español rioplatense (vos, podés, tenés)
-- Registro de métricas: tokens, latencia, costo estimado por consulta
+- Registro de métricas: tokens, latencia, costo estimado por consulta (prompt almacenado como hash SHA-256)
+- Dashboard de métricas vía API: endpoint `/api/v1/metrics/summary` con totales y promedios agregados
 - Prompt engineering: few-shot y chain-of-thought
 - Moderación de contenido adversarial (fallback seguro):
   - **ModerationService** detecta lenguaje riesgoso, intentos de prompt injection, amenazas o datos sensibles, y bloquea o anonimiza según reglas de negocio.
@@ -64,11 +65,28 @@ pip install -r requirements.txt
 uvicorn src.main:app --reload
 ```
 
-## Cómo ver métricas
+## Métricas
 
 Cada request registra métricas en `metrics/metrics.csv`:
 
-- timestamp, prompt, modelo, tokens_prompt, tokens_completion, total_tokens, latency_ms, estimated_cost_usd
+- `timestamp`, `prompt_hash`, `model`, `tokens_prompt`, `tokens_completion`, `total_tokens`, `latency_ms`, `estimated_cost_usd`
+
+El campo `prompt_hash` es un SHA-256 truncado del texto original, lo que permite agrupar prompts similares sin almacenar el texto crudo.
+
+### Dashboard de métricas
+
+`GET /api/v1/metrics/summary` devuelve los totales y promedios agregados del CSV:
+
+```json
+{
+  "total_requests": 42,
+  "total_tokens": 38400,
+  "total_cost_usd": 0.005760,
+  "avg_latency_ms": 1823.4,
+  "avg_tokens_per_request": 914.3,
+  "models_used": ["gpt-4o-mini"]
+}
+```
 
 ## Cómo ver logs de moderación
 

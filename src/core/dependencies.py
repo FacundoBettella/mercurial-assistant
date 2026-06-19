@@ -9,6 +9,7 @@ from src.domain.services.moderation_service import ModerationEvaluator, Moderati
 from src.domain.services.prompt_metric_service import PromptMetricService
 from src.infrastructure.repositories.metric_csv import CsvMetricRepository
 from src.application.generate_completion_use_case import GenerateCompletionUseCase
+from src.domain.services.metric_summary_service import MetricSummaryService
 from src.application.pipeline.pipeline import Pipeline
 from src.application.pipeline.steps.moderation_step import ModerationStep
 from src.application.pipeline.steps.llm_step import LLMProcessingStep
@@ -53,6 +54,11 @@ def get_pipeline() -> Pipeline:
         LLMProcessingStep(get_llm_provider(), get_prompt_metric_service()),
         LoggingStep(get_log_repository())
     ])
+
+@lru_cache
+def get_metric_summary_service() -> MetricSummaryService:
+    return MetricSummaryService(metric_repository=get_metric_repository())
+
 
 @lru_cache
 def get_generate_completion_use_case() -> GenerateCompletionUseCase:
