@@ -5,13 +5,29 @@ class LLMGenerateRequestDTO(BaseModel):
     prompt: str = Field(min_length=1, description="User's question or instruction.")
 
 
+class ModelBreakdownDTO(BaseModel):
+    requests: int
+    total_tokens: int
+    total_cost_usd: float
+    avg_latency_ms: float
+
+
+class TopPromptDTO(BaseModel):
+    prompt_hash: str
+    count: int
+
+
 class MetricSummaryResponseDTO(BaseModel):
     total_requests: int
     total_tokens: int
     total_cost_usd: float
     avg_latency_ms: float
+    p50_latency_ms: float
+    p95_latency_ms: float
     avg_tokens_per_request: float
     models_used: list[str]
+    by_model: dict[str, ModelBreakdownDTO]
+    top_prompts: list[TopPromptDTO]
 
 class LLMGenerateResponseDTO(BaseModel):
     answer: str = Field(..., description="Model-generated answer, ready to display to the end user.")

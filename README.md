@@ -75,7 +75,11 @@ El campo `prompt_hash` es un SHA-256 truncado del texto original, lo que permite
 
 ### Dashboard de métricas
 
-`GET /api/v1/metrics/summary` devuelve los totales y promedios agregados del CSV:
+`GET /api/v1/metrics/summary` devuelve totales, percentiles de latencia, breakdown por modelo y prompts repetidos:
+
+```
+GET /api/v1/metrics/summary?model=gpt-4o-mini&top_prompts=5
+```
 
 ```json
 {
@@ -83,10 +87,20 @@ El campo `prompt_hash` es un SHA-256 truncado del texto original, lo que permite
   "total_tokens": 38400,
   "total_cost_usd": 0.005760,
   "avg_latency_ms": 1823.4,
+  "p50_latency_ms": 1750.0,
+  "p95_latency_ms": 3850.2,
   "avg_tokens_per_request": 914.3,
-  "models_used": ["gpt-4o-mini"]
+  "models_used": ["gpt-4o-mini"],
+  "by_model": {
+    "gpt-4o-mini": { "requests": 42, "total_tokens": 38400, "total_cost_usd": 0.00576, "avg_latency_ms": 1823.4 }
+  },
+  "top_prompts": [
+    { "prompt_hash": "a3f1c2d4", "count": 8 }
+  ]
 }
 ```
+
+Query params opcionales: `model` (filtra por modelo), `top_prompts` (1-20, default 5).
 
 ## Cómo ver logs de moderación
 
